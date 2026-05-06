@@ -1,4 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Content Broadcasting System (Frontend)
+
+A full‑featured Next.js (App Router) front‑end for a role‑based content broadcasting platform. It demonstrates clean architecture, shadcn/ui, Tailwind CSS, mock service layer, and professional UI/UX.
+
+---
+
+## 📦 Tech Stack
+- **Framework:** Next.js 13 (App Router)
+- **Styling:** Tailwind CSS + shadcn/ui components
+- **Form handling:** react‑hook‑form + Zod
+- **State & auth:** React Context (AuthContext)
+- **Data layer:** Service layer (`src/services/`) with mock `localStorage` backend (easy swap to real API)
+- **Performance:** `react-window` virtualized tables, memoized components, next/image optimization
+- **Feedback UI:** sonner toasts, skeleton loaders, empty states
+
+---
+
+## 📂 Project Structure
+```
+src/
+├─ app/               # Next.js pages (teacher, principal, public live, login)
+├─ components/        # UI primitives, DashboardLayout, VirtualizedTable
+├─ context/           # AuthContext
+├─ services/          # auth, content, approval services (mock API)
+├─ utils/             # apiClient (token injection)
+├─ styles/            # Tailwind config & globals
+└─ ...
+```
+
+---
+
+## 🔧 Setup & Development
+1. **Clone the repo**
+   ```bash
+   git clone <REPO_URL>
+   cd <repo-folder>
+   ```
+2. **Install dependencies**
+   ```bash
+   npm install   # or yarn, pnpm, bun
+   ```
+3. **Run the development server**
+   ```bash
+   npm run dev
+   ```
+   Open `http://localhost:3000` in your browser.
+4. **Testing the flows**
+   - **Login** – use the test accounts:
+     - Principal: `principal@school.com` / `password123`
+     - Teacher:   `teacher@school.com`   / `password123`
+   - Navigate through teacher & principal portals, upload content, approve/reject, view public live page (`/live/:teacherId`).
+
+---
+
+## 📦 Build for Production
+```bash
+npm run build   # creates .next/**
+```
+The output can be served with `next start` or deployed to Vercel.
+
+---
+
+## 🚀 Deployment
+- **Vercel (recommended)** – Connect your GitHub repository and click *Deploy*.
+- **Deployment URL:** `<DEPLOYMENT_LINK>`  *(replace with the actual Vercel URL after deployment)*
+
+---
+
+## 📚 Documentation
+- `Frontend-notes.txt` – detailed notes on architecture, auth flow, routing, API approach, state management, and assumptions.
+
+---
+
+## 📄 License
+MIT © 2026 Sondrya Gupta
+
 
 ## Getting Started
 
