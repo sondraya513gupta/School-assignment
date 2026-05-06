@@ -1,0 +1,72 @@
+# Frontend‑notes.txt
+
+## 1. Project structure
+```
+src/
+├─ app/                     # Next.js App Router pages
+│   ├─ teacher/            # Teacher‑specific routes
+│   │   ├─ dashboard/page.js
+│   │   ├─ upload/page.js
+│   │   └─ my-content/page.js
+│   ├─ principal/          # Principal‑specific routes
+│   │   ├─ dashboard/page.js
+│   │   ├─ pending/page.js
+│   │   └─ all-content/page.js
+│   ├─ live/[teacherId]/page.js   # Public live broadcast page
+│   └─ login/page.js                # Shared login page
+├─ components/              # Re‑usable UI components (shadcn/ui based)
+│   ├─ DashboardLayout.js  # Sidebar + layout wrapper
+│   ├─ VirtualizedTable.jsx # Efficient large‑list table (react‑window)
+│   └─ …
+├─ context/                 # React context providers
+│   └─ AuthContext.js        # Auth state, login, logout, role handling
+├─ services/                # All API‑like calls (mocked via localStorage)
+│   ├─ auth.service.js
+│   ├─ content.service.js
+│   └─ approval.service.js
+├─ utils/                   # Helper utilities
+│   └─ apiClient.js          # mockApiCall wrapper that injects token
+├─ hooks/                   # Custom hooks (e.g., useAuth)
+└─ styles/ (or globals.css) # Tailwind base/styles
+```
+The folder layout follows the **clean‑separation** principle: UI → business logic (services) → state (context) → utilities.
+
+## 2. Authentication flow
+1. **Login page** (`/login`) uses `react‑hook‑form` + Zod for validation.
+2. On submit, it calls `authService.login(email, password)`. The mock service validates against hard‑coded test users and stores a JWT‑like token in `localStorage`.
+3. `AuthContext` reads the token on app start, decodes the role (`teacher` or `principal`) and user info, and exposes `{ user, login, logout, loading }`.
+4. When `login` succeeds, `AuthContext` triggers a redirect based on `user.role`:
+   - Teacher → `/teacher/dashboard`
+   - Principal → `/principal/dashboard`
+5. `logout` clears the token and redirects back to `/login`.
+
+## 3. Role‑based routing
+* The **DashboardLayout** checks `user.role` and builds the sidebar navigation accordingly (teacherLinks vs. principalLinks).
+* Each protected page wraps its component with `useAuth()`; if `!user` it redirects to `/login`.
+* The `next/navigation` `useRouter` hook is used for client‑side redirects.
+* Public live page (`/live/:teacherId`) does **not** require auth – it fetches approved content for the given teacher ID.
+
+## 4. API integration approach
+* All data operations go through the **service layer** (`src/services/`).
+* The service functions return a **mockApiCall** promise which:
+  - Simulates network latency with `setTimeout`
+  - Reads/writes to `localStorage` (acts as an in‑memory DB)
+  - Accepts a callback that receives the stored auth token – this mirrors how a real `axios` interceptor would attach `Authorization: Bearer <token>`.
+* Switching to a real backend is trivial: replace the `mockApiCall` implementation in `src/utils/apiClient.js` with an `axios` instance and keep the same method signatures in the service files.
+
+## 5. State management approach
+* **Global auth state** – `AuthContext` (React Context) holds the current user and token.
+* **Page‑local state** – each page uses `useState` for its own data (e.g., `content`, `loading`, `error`).
+* No prop‑drilling: child components receive data via props from the page that fetched it, or read directly from context if globally needed.
+* **Memoization** – `VirtualizedTable` and helper functions are memoized (`React.memo`, `useCallback`) to prevent unnecessary re‑renders when large lists change.
+
+## 6. Assumptions made
+* The backend does not exist yet; a **mock localStorage** implementation is sufficient for functional demos and satisfies the requirement to keep the API layer replaceable.
+* Authentication uses static test accounts (`principal@school.com`, `teacher@school.com` with password `password123`).
+* File uploads are limited to images (JPG/PNG/GIF) ≤ 10 MB; the preview is generated client‑side using `FileReader` – no actual file upload to a server.
+* Scheduling logic (Scheduled / Active / Expired) is purely UI‑driven – it compares timestamps on the client.
+* The UI follows a **mobile‑first** approach; components collapse/stack on small screens and expand on larger viewports.
+* No server‑side rendering is required for this assignment; all data fetching happens client‑side after authentication.
+
+---
+*Document generated on 2026‑05‑05, reflecting the current codebase state.*
